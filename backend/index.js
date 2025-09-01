@@ -111,7 +111,39 @@ app.get('/api/medicamentos/:idosoId', async (req, res) => {
     }
 });
 
-// ... (todas as outras rotas, como /api/medicamento/:id, /api/medicamentos/:id (PUT e DELETE) e /api/historico)
+// Rota para obter detalhes de um único medicamento
+app.get('/api/medicamento/:medicamentoId', async (req, res) => {
+    try {
+        const { medicamentoId } = req.params;
+        const result = await pool.query('SELECT * FROM medicamentos WHERE id = $1', [medicamentoId]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Medicamento não encontrado.' });
+        }
+        res.status(200).json(result.rows[0]);
+    } catch (error) {
+        console.error('ERRO AO BUSCAR DETALHES DO MEDICAMENTO:', error);
+        res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+});
+
+// Rota para atualizar um medicamento
+app.put('/api/medicamentos/:medicamentoId', async (req, res) => {
+    try {
+        const { medicamentoId } = req.params;
+        const { nome, dosagem, horario, foto_url, observacoes } = req.body;
+        const result = await pool.query(
+            'UPDATE medicamentos SET nome = $1, dosagem = $2, horario = $3, foto_url = $4, observacoes = $5 WHERE id = $6 RETURNING *',
+            [nome, dosagem, horario, foto_url, observacoes, medicamentoId]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Medicamento não encontrado para atualizar.' });
+        }
+        res.status(200).json({ message: 'Medicamento atualizado com sucesso!', medicamento: result.rows[0] });
+    } catch (error) {
+        console.error('ERRO AO ATUALIZAR MEDICAMENTO:', error);
+        res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+});
 
 app.delete('/api/medicamentos/:medicamentoId', async (req, res) => {
     try {
