@@ -1,0 +1,25 @@
+{
+    "name": "AtivaMemória",
+    "short_name": "Cuidar",
+    "description": "Uma aplicação para ajudar a gerir medicamentos para idosos.",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#f0f4f8",
+    "theme_color": "#4a90e2",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "https://img.icons8.com/plasticine/192/pill.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "https://img.icons8.com/plasticine/512/pill.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
+
