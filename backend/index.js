@@ -1,17 +1,20 @@
-// backend/index.js - Versão para Desenvolvimento Local com funcionalidade de EDIÇÃO
+// backend/index.js - Versão Final para Produção (Render)
 
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
+const path = require('path'); // Módulo para lidar com caminhos de ficheiros
 
 const app = express();
-const PORT = 3000;
+// O Render define a porta através da variável de ambiente PORT
+const PORT = process.env.PORT || 3000;
 
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// Configuração para a conexão com a base de dados LOCAL
+// Configuração da conexão com a base de dados do Render
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL, // O Render fornece esta variável de ambiente
     ssl: {
@@ -19,7 +22,8 @@ const pool = new Pool({
     }
 });
 
-// --- ROTAS DE AUTENTICAÇÃO E REGISTO ---
+// --- ROTAS DA API ---
+// Todas as rotas agora começam com /api para não conflitarem com o front-end
 app.post('/api/registro', async (req, res) => {
     let client;
     try {
@@ -80,8 +84,6 @@ app.post('/api/login/idoso', async (req, res) => {
     }
 });
 
-
-// --- ROTAS DE MEDICAMENTOS (CRUD COMPLETO) ---
 app.post('/api/medicamentos', async (req, res) => {
     try {
         const { nome, dosagem, horario, foto_url, observacoes, idoso_id } = req.body;
@@ -108,42 +110,6 @@ app.get('/api/medicamentos/:idosoId', async (req, res) => {
     }
 });
 
-// NOVA ROTA: Obter detalhes de um único medicamento para edição
-app.get('/api/medicamento/:medicamentoId', async (req, res) => {
-    try {
-        const { medicamentoId } = req.params;
-        const result = await pool.query('SELECT * FROM medicamentos WHERE id = $1', [medicamentoId]);
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'Medicamento não encontrado.' });
-        }
-        res.status(200).json(result.rows[0]);
-    } catch (error) {
-        console.error('ERRO AO BUSCAR DETALHES DO MEDICAMENTO:', error);
-        res.status(500).json({ message: 'Erro interno do servidor.' });
-    }
-});
-
-// NOVA ROTA: Atualizar um medicamento existente
-app.put('/api/medicamentos/:medicamentoId', async (req, res) => {
-    try {
-        const { medicamentoId } = req.params;
-        const { nome, dosagem, horario, foto_url, observacoes } = req.body;
-        
-        const result = await pool.query(
-            'UPDATE medicamentos SET nome = $1, dosagem = $2, horario = $3, foto_url = $4, observacoes = $5 WHERE id = $6 RETURNING *',
-            [nome, dosagem, horario, foto_url, observacoes, medicamentoId]
-        );
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'Medicamento não encontrado para atualizar.' });
-        }
-        res.status(200).json({ message: 'Medicamento atualizado com sucesso!', medicamento: result.rows[0] });
-    } catch (error) {
-        console.error('ERRO AO ATUALIZAR MEDICAMENTO:', error);
-        res.status(500).json({ message: 'Erro interno do servidor.' });
-    }
-});
-
 app.delete('/api/medicamentos/:medicamentoId', async (req, res) => {
     try {
         const { medicamentoId } = req.params;
@@ -155,8 +121,6 @@ app.delete('/api/medicamentos/:medicamentoId', async (req, res) => {
     }
 });
 
-
-// --- ROTAS DE HISTÓRICO ---
 app.post('/api/historico', async (req, res) => {
     try {
         const { medicamento_id, status } = req.body;
@@ -188,6 +152,9 @@ app.get('/api/historico/:idosoId', async (req, res) => {
     }
 });
 
+
+// --- SERVIR O FRONT-END ---
+// Esta secção serve os ficheiros da pasta 'frontend'
 const frontendPath = path.join(__dirname, '..', 'frontend');
 app.use(express.static(frontendPath));
 
@@ -197,6 +164,7 @@ app.use(express.static(frontendPath));
 app.get('*', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
 });
+
 
 // --- INICIAR O SERVIDOR ---
 app.listen(PORT, () => {
