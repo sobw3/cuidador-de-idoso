@@ -1,9 +1,6 @@
-// frontend/js/app.js
+// frontend/js/app.js - Versão para Desenvolvimento Local com funcionalidade de EDIÇÃO
 
-// O elemento principal onde a aplicação será renderizada
 const app = document.getElementById('app');
-
-// URL base da nossa API no back-end
 const API_URL = '/api';
 
 /**
@@ -11,8 +8,6 @@ const API_URL = '/api';
  * FUNÇÕES DE LÓGICA (FETCH & RENDER)
  * =================================================================
  */
-
-// --- LÓGICA PARA O PAINEL DO CUIDADOR ---
 
 const carregarEMostrarMedicamentosCuidador = async () => {
     const container = document.getElementById('lista-medicamentos');
@@ -32,7 +27,10 @@ const carregarEMostrarMedicamentosCuidador = async () => {
         container.innerHTML = medicamentos.map(med => `
             <li class="medicamento-item-cuidador">
                 <span><i class="fas fa-pills"></i> <strong>${med.nome}</strong> (${med.dosagem}) - ${med.horario.substring(0, 5)}</span>
-                <button class="btn-apagar" data-id="${med.id}"><i class="fas fa-trash-alt"></i></button>
+                <div class="botoes-acao">
+                    <button class="btn-editar" data-route="editar-medicamento/${med.id}"><i class="fas fa-pencil-alt"></i></button>
+                    <button class="btn-apagar" data-id="${med.id}"><i class="fas fa-trash-alt"></i></button>
+                </div>
             </li>
         `).join('');
     } catch (error) {
@@ -47,7 +45,6 @@ const carregarEMostrarHistoricoCuidador = async (dataInput) => {
     if (!container || !idoso) return;
 
     container.innerHTML = '<li>A carregar histórico...</li>';
-
     const dataFormatada = dataInput;
     
     try {
@@ -90,10 +87,6 @@ const carregarEMostrarHistoricoCuidador = async (dataInput) => {
     }
 };
 
-
-// --- LÓGICA PARA O PAINEL DO IDOSO ---
-
-// Helper para obter a saudação correta com base na hora
 const obterSaudacao = () => {
     const hora = new Date().getHours();
     if (hora >= 5 && hora < 12) return 'Bom dia';
@@ -101,43 +94,32 @@ const obterSaudacao = () => {
     return 'Boa noite';
 };
 
-// Nova função para gerir as notificações de forma mais profissional
 const gerirNotificacoes = (medicamentos, nomeIdoso) => {
-    // 1. Pede permissão ao utilizador para enviar notificações
+    if (!('Notification' in window)) {
+        console.log('Este navegador não suporta notificações.');
+        return;
+    }
+
     Notification.requestPermission().then(permission => {
         if (permission !== 'granted') {
-            console.warn('Permissão para notificações não foi concedida. As notificações não serão enviadas.');
+            console.warn('Permissão para notificações não foi concedida.');
             return;
         }
 
-        console.log('Permissão concedida. A agendar notificações...');
         const agora = new Date();
-
-        // 2. Itera sobre cada medicamento registado
         medicamentos.forEach(med => {
             const [horas, minutos] = med.horario.split(':');
             const dataMedicamento = new Date();
             dataMedicamento.setHours(horas, minutos, 0, 0);
 
-            // 3. Apenas agenda notificações para horários futuros no dia de hoje
             if (dataMedicamento > agora) {
                 const tempoParaNotificar = dataMedicamento.getTime() - agora.getTime();
-                
-                // 4. Agenda a notificação para o horário exato do medicamento
                 setTimeout(() => {
-                    // Obtém a saudação no momento exato da notificação
                     const saudacao = obterSaudacao();
                     const titulo = `${saudacao}, ${nomeIdoso}!`;
                     const corpo = `Está na hora de tomar o seu ${med.nome} (${med.dosagem}).`;
-                    
-                    // Cria e exibe a notificação do navegador
-                    new Notification(titulo, {
-                        body: corpo,
-                        icon: 'https://img.icons8.com/plasticine/100/pill.png' // Ícone genérico de pílula
-                    });
+                    new Notification(titulo, { body: corpo, icon: '/images/logo-192.png' });
                 }, tempoParaNotificar);
-
-                console.log(`Notificação para ${med.nome} agendada para as ${med.horario}.`);
             }
         });
     });
@@ -149,7 +131,6 @@ const carregarEMostrarMedicamentosIdoso = async () => {
     if (!container || !idoso) return;
 
     container.innerHTML = '<p>A carregar medicamentos...</p>';
-
     try {
         const response = await fetch(`${API_URL}/medicamentos/${idoso.id}`);
         if (!response.ok) throw new Error('Falha ao buscar medicamentos.');
@@ -167,6 +148,7 @@ const carregarEMostrarMedicamentosIdoso = async () => {
                     <div class="medicamento-info">
                         <h3>${med.nome}</h3>
                         <p>${med.dosagem} - às <strong>${med.horario.substring(0, 5)}</strong></p>
+                        ${med.observacoes ? `<small class="medicamento-obs"><strong>Obs:</strong> ${med.observacoes}</small>` : ''}
                     </div>
                 </div>
                 <div class="medicamento-actions">
@@ -178,11 +160,9 @@ const carregarEMostrarMedicamentosIdoso = async () => {
             </div>
         `).join('');
         
-        // Chama a nova função de notificações
         gerirNotificacoes(medicamentos, idoso.nome);
-
     } catch (error) {
-        container.innerHTML = '<div class="card-vazio"><i class="fas fa-exclamation-circle"></i><p style="color: var(--cor-erro);">Não foi possível carregar os seus medicamentos. Tente mais tarde.</p></div>';
+        container.innerHTML = '<div class="card-vazio"><i class="fas fa-exclamation-circle"></i><p style="color: var(--cor-erro);">Não foi possível carregar os seus medicamentos.</p></div>';
         console.error(error);
     }
 };
@@ -193,7 +173,6 @@ const carregarEMostrarMedicamentosIdoso = async () => {
  * =================================================================
  */
 
-// Tela Inicial: Seleção de Perfil
 const viewHome = () => {
     return `
         <div class="card">
@@ -213,13 +192,12 @@ const viewHome = () => {
     `;
 };
 
-// Tela de Login do Familiar/Cuidador
 const viewLoginCuidador = () => {
     return `
         <div class="card">
             <i class="fas fa-users" style="font-size: 3em; color: var(--cor-primaria); margin-bottom: 20px;"></i>
             <h1>Login do Familiar</h1>
-            <p class="subtitulo">Acesse à sua conta para gerir os medicamentos.</p>
+            <p class="subtitulo">Aceda à sua conta para gerir os medicamentos.</p>
             <form id="form-login-cuidador">
                 <div class="form-group">
                     <label for="email">Email:</label>
@@ -238,13 +216,12 @@ const viewLoginCuidador = () => {
     `;
 };
 
-// Tela de Login do Idoso
 const viewLoginIdoso = () => {
     return `
         <div class="card">
             <i class="fas fa-user-check" style="font-size: 3em; color: var(--cor-secundaria); margin-bottom: 20px;"></i>
             <h1>Acesso Simplificado</h1>
-            <p class="subtitulo">Use o código que o seu familiar criou especialmente para você.</p>
+            <p class="subtitulo">Use o código que o seu familiar criou para si.</p>
             <form id="form-login-idoso">
                 <div class="form-group">
                     <label for="login-numerico">O seu Código de Acesso:</label>
@@ -257,13 +234,12 @@ const viewLoginIdoso = () => {
                 <button type="submit" class="btn">Entrar</button>
             </form>
             <p style="margin-top: 20px;">
-                É um familiar? <span class="nav-link" data-route="login-cuidador">Acesse aqui</span>
+                É um familiar? <span class="nav-link" data-route="login-cuidador">Aceda aqui</span>
             </p>
         </div>
     `;
 };
 
-// Tela de Registro
 const viewRegistro = () => {
     return `
         <div class="card" style="max-width: 550px;">
@@ -290,7 +266,6 @@ const viewRegistro = () => {
     `;
 };
 
-// TELA: Painel do Cuidador
 const viewPainelCuidador = () => {
     const cuidador = JSON.parse(localStorage.getItem('cuidador'));
     const idoso = JSON.parse(localStorage.getItem('idoso'));
@@ -320,6 +295,7 @@ const viewPainelCuidador = () => {
                     <div class="form-group"><label for="med-dosagem">Dosagem</label><input type="text" id="med-dosagem" required></div>
                     <div class="form-group"><label for="med-horario">Horário</label><input type="time" id="med-horario" required></div>
                     <div class="form-group form-group-full"><label for="med-foto">URL da Foto (opcional)</label><input type="text" id="med-foto" placeholder="https://exemplo.com/imagem.png"></div>
+                    <div class="form-group form-group-full"><label for="med-observacoes">Observações (opcional)</label><textarea id="med-observacoes" rows="2" placeholder="Ex: Tomar em jejum, com um copo de água..."></textarea></div>
                     <button type="submit" class="btn form-group-full">Adicionar</button>
                 </form>
             </div>
@@ -343,7 +319,6 @@ const viewPainelCuidador = () => {
     `;
 };
 
-// TELA: Painel de Medicamentos do Idoso
 const viewPainelIdoso = () => {
     const idoso = JSON.parse(localStorage.getItem('idosoLogado'));
     if (!idoso) {
@@ -360,13 +335,22 @@ const viewPainelIdoso = () => {
                 </div>
                 <button class="btn" id="btn-logout-idoso" style="width: auto; background-color: var(--cor-erro);">Sair</button>
             </div>
-            <div id="lista-medicamentos-idoso-container">
-                <p>A carregar medicamentos...</p>
-            </div>
+            <div id="lista-medicamentos-idoso-container"><p>A carregar medicamentos...</p></div>
         </div>
     `;
 };
 
+const viewEditarMedicamento = () => {
+    return `
+        <div class="card" style="max-width: 550px;">
+            <h2>Editar Medicamento</h2>
+            <p class="subtitulo">A carregar dados do medicamento...</p>
+            <form id="form-editar-medicamento">
+                <!-- O JavaScript irá preencher este formulário -->
+            </form>
+        </div>
+    `;
+};
 
 /**
  * =================================================================
@@ -380,27 +364,56 @@ const routes = {
     'registro': viewRegistro,
     'painel-cuidador': viewPainelCuidador,
     'painel-idoso': viewPainelIdoso,
+    'editar-medicamento/:id': viewEditarMedicamento,
 };
 
 const navigateTo = (path) => { window.location.hash = path; };
 
-const router = () => {
+const router = async () => {
     const path = window.location.hash.substring(1);
-    const view = routes[path] || viewHome;
+    const [pathName, param] = path.split('/');
+
+    let view;
+    if (pathName === 'editar-medicamento' && param) {
+        view = routes['editar-medicamento/:id'];
+    } else {
+        view = routes[pathName] || viewHome;
+    }
+    
     app.innerHTML = view();
 
-    if (path === 'painel-cuidador') {
-        carregarEMostrarMedicamentosCuidador();
-        
+    if (pathName === 'painel-cuidador') {
         const inputData = document.getElementById('data-historico');
+        carregarEMostrarMedicamentosCuidador();
         carregarEMostrarHistoricoCuidador(inputData.value);
-
         inputData.addEventListener('change', () => {
             carregarEMostrarHistoricoCuidador(inputData.value);
         });
-    }
-    if (path === 'painel-idoso') {
+    } else if (pathName === 'painel-idoso') {
         carregarEMostrarMedicamentosIdoso();
+    } else if (pathName === 'editar-medicamento' && param) {
+        try {
+            const response = await fetch(`${API_URL}/medicamento/${param}`);
+            if (!response.ok) throw new Error('Medicamento não encontrado.');
+            const med = await response.json();
+            
+            const formContainer = document.getElementById('form-editar-medicamento');
+            const subtitulo = document.querySelector('.subtitulo');
+            subtitulo.style.display = 'none';
+
+            formContainer.innerHTML = `
+                <input type="hidden" id="edit-med-id" value="${med.id}">
+                <div class="form-group"><label for="edit-med-nome">Nome</label><input type="text" id="edit-med-nome" value="${med.nome}" required></div>
+                <div class="form-group"><label for="edit-med-dosagem">Dosagem</label><input type="text" id="edit-med-dosagem" value="${med.dosagem}" required></div>
+                <div class="form-group"><label for="edit-med-horario">Horário</label><input type="time" id="edit-med-horario" value="${med.horario}" required></div>
+                <div class="form-group"><label for="edit-med-foto">URL da Foto</label><input type="text" id="edit-med-foto" value="${med.foto_url || ''}"></div>
+                <div class="form-group"><label for="edit-med-observacoes">Observações</label><textarea id="edit-med-observacoes" rows="3">${med.observacoes || ''}</textarea></div>
+                <button type="submit" class="btn">Guardar Alterações</button>
+            `;
+        } catch (error) {
+            app.innerHTML = `<div class="card"><h2>Erro</h2><p>${error.message}</p></div>`;
+            console.error(error);
+        }
     }
 };
 
@@ -409,7 +422,6 @@ const router = () => {
  * MANIPULADORES DE EVENTOS
  * =================================================================
  */
-
 app.addEventListener('click', async (e) => {
     const navLink = e.target.closest('[data-route]');
     if (navLink) {
@@ -471,7 +483,7 @@ app.addEventListener('click', async (e) => {
                 if (!response.ok) throw new Error('Falha ao apagar.');
                 
                 carregarEMostrarMedicamentosCuidador();
-                carregarEMostrarHistoricoCuidador(document.getElementById('data-historico').value); // Atualiza o histórico também
+                carregarEMostrarHistoricoCuidador(document.getElementById('data-historico').value);
             } catch (error) {
                 alert('Não foi possível apagar o medicamento.');
                 console.error(error);
@@ -562,6 +574,7 @@ app.addEventListener('submit', async (e) => {
             dosagem: document.getElementById('med-dosagem').value,
             horario: document.getElementById('med-horario').value,
             foto_url: document.getElementById('med-foto').value,
+            observacoes: document.getElementById('med-observacoes').value,
             idoso_id: idoso.id
         };
         try {
@@ -574,15 +587,41 @@ app.addEventListener('submit', async (e) => {
             
             e.target.reset(); 
             carregarEMostrarMedicamentosCuidador(); 
-            carregarEMostrarHistoricoCuidador(document.getElementById('data-historico').value); // Atualiza o histórico
+            carregarEMostrarHistoricoCuidador(document.getElementById('data-historico').value);
         } catch (error) {
             alert('Não foi possível registar o medicamento.');
             console.error(error);
         }
     }
+
+    if (formId === 'form-editar-medicamento') {
+        const id = document.getElementById('edit-med-id').value;
+        const dados = {
+            nome: document.getElementById('edit-med-nome').value,
+            dosagem: document.getElementById('edit-med-dosagem').value,
+            horario: document.getElementById('edit-med-horario').value,
+            foto_url: document.getElementById('edit-med-foto').value,
+            observacoes: document.getElementById('edit-med-observacoes').value,
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/medicamentos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+
+            alert(result.message);
+            navigateTo('painel-cuidador');
+        } catch (error) {
+            alert(`Não foi possível atualizar o medicamento: ${error.message}`);
+            console.error(error);
+        }
+    }
 });
 
-// O roteador é chamado quando a página carrega ou quando o hash na URL muda
 window.addEventListener('hashchange', router);
 window.addEventListener('load', router);
 
