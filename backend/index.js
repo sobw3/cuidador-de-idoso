@@ -15,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 // Configuração da conexão com a base de dados do Render
+// Esta é a alteração mais importante para a produção!
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL, // O Render fornece esta variável de ambiente
     ssl: {
@@ -110,6 +111,8 @@ app.get('/api/medicamentos/:idosoId', async (req, res) => {
     }
 });
 
+// ... (todas as outras rotas, como /api/medicamento/:id, /api/medicamentos/:id (PUT e DELETE) e /api/historico)
+
 app.delete('/api/medicamentos/:medicamentoId', async (req, res) => {
     try {
         const { medicamentoId } = req.params;
@@ -158,9 +161,7 @@ app.get('/api/historico/:idosoId', async (req, res) => {
 const frontendPath = path.join(__dirname, '..', 'frontend');
 app.use(express.static(frontendPath));
 
-// A SOLUÇÃO ESTÁ AQUI: Rota "catch-all" para a SPA. 
-// Qualquer pedido que não seja para a API, devolve o index.html
-// Esta rota deve vir DEPOIS de todas as suas rotas de API.
+// Rota "catch-all" para a SPA. Qualquer pedido que não seja para a API, devolve o index.html
 app.get('*', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
 });
