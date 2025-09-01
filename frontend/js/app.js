@@ -4,7 +4,7 @@
 const app = document.getElementById('app');
 
 // URL base da nossa API no back-end
-const API_URL = 'http://localhost:3000';
+const API_URL = '/api';
 
 /**
  * =================================================================
