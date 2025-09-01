@@ -197,7 +197,7 @@ const viewLoginCuidador = () => {
         <div class="card">
             <i class="fas fa-users" style="font-size: 3em; color: var(--cor-primaria); margin-bottom: 20px;"></i>
             <h1>Login do Familiar</h1>
-            <p class="subtitulo">Aceda à sua conta para gerir os medicamentos.</p>
+            <p class="subtitulo">Acesse à sua conta para gerir os medicamentos.</p>
             <form id="form-login-cuidador">
                 <div class="form-group">
                     <label for="email">Email:</label>
@@ -221,7 +221,7 @@ const viewLoginIdoso = () => {
         <div class="card">
             <i class="fas fa-user-check" style="font-size: 3em; color: var(--cor-secundaria); margin-bottom: 20px;"></i>
             <h1>Acesso Simplificado</h1>
-            <p class="subtitulo">Use o código que o seu familiar criou para si.</p>
+            <p class="subtitulo">Use o código que o seu familiar criou para você.</p>
             <form id="form-login-idoso">
                 <div class="form-group">
                     <label for="login-numerico">O seu Código de Acesso:</label>
@@ -234,7 +234,7 @@ const viewLoginIdoso = () => {
                 <button type="submit" class="btn">Entrar</button>
             </form>
             <p style="margin-top: 20px;">
-                É um familiar? <span class="nav-link" data-route="login-cuidador">Aceda aqui</span>
+                É um familiar? <span class="nav-link" data-route="login-cuidador">Acesse aqui</span>
             </p>
         </div>
     `;
