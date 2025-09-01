@@ -1,78 +1,129 @@
-/* css/style.css - VERSÃO COMPLETA E MELHORADA */
+/* css/style.css - VERSÃO COMPLETA E FINAL COM FOCO EM MOBILE */
 
-/* 1. Importação de Fontes e Variáveis Globais */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap');
 
 :root {
-    --cor-fundo: #f4f7f9;
+    --cor-fundo: #f0f4f8;
     --cor-card: #ffffff;
     --cor-primaria: #4a90e2;
     --cor-secundaria: #50e3c2;
     --cor-erro: #e94f37;
-    --cor-sucesso: #28a745;
     --cor-aviso: #ffc107;
     --cor-texto-titulo: #1e3a5f;
     --cor-texto-corpo: #5a718c;
     --cor-borda-suave: #e6e9ed;
-    
     --fonte-titulo: 'Poppins', sans-serif;
     --fonte-corpo: 'Open Sans', sans-serif;
-    
-    --sombra-card: 0 8px 25px rgba(0, 0, 0, 0.08);
+    --sombra-card: 0 4px 12px rgba(0, 0, 0, 0.08);
     --transicao-suave: all 0.3s ease;
 }
 
-/* 2. Estilos Globais */
+/* --- RESET BÁSICO E CONFIGURAÇÃO GERAL --- */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 body {
     font-family: var(--fonte-corpo);
     background-color: var(--cor-fundo);
     color: var(--cor-texto-corpo);
     margin: 0;
-    line-height: 1.7;
+    line-height: 1.6;
+    padding-top: 80px;  /* Espaço para o header fixo */
+    padding-bottom: 50px; /* Espaço para o footer fixo */
+}
+
+#app {
+    width: 100%;
+    max-width: 1200px; /* Largura máxima para ecrãs grandes */
+    margin: 0 auto;
+    padding: 20px 15px; /* Padding lateral para mobile */
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Alinha ao topo para paineis longos */
-    min-height: 100vh;
-    padding: 30px;
-    box-sizing: border-box;
+    align-items: center;
+    min-height: calc(100vh - 130px);
 }
 
-/* 3. Componentes Reutilizáveis */
+/* --- LAYOUT PRINCIPAL (HEADER/FOOTER) --- */
+.main-header, .main-footer {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+}
+.main-header {
+    top: 0;
+    height: 80px;
+    background-color: var(--cor-primaria);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.header-logo {
+    height: 60px;
+    width: auto;
+    filter: brightness(0) invert(1);
+}
+.main-footer {
+    bottom: 0;
+    height: 50px;
+    background-color: var(--cor-texto-titulo);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85em;
+}
 
-/* Card Principal */
+
+/* --- COMPONENTES GLOBAIS --- */
 .card {
     width: 100%;
-    max-width: 800px;
+    max-width: 500px;
     background-color: var(--cor-card);
-    border-radius: 20px;
+    border-radius: 16px;
     box-shadow: var(--sombra-card);
-    padding: 40px 50px;
+    padding: 25px;
     text-align: center;
-    box-sizing: border-box;
 }
-/* Wrapper para o painel do idoso, sem o padding do card */
-.card-idoso-wrapper {
-    width: 100%;
-    max-width: 700px;
-}
-
-
-/* Títulos */
 h1, h2, h3 {
     font-family: var(--fonte-titulo);
     color: var(--cor-texto-titulo);
     margin-top: 0;
+    line-height: 1.2;
 }
-h1 { font-size: 2.4em; }
-h2 { font-size: 2em; margin-bottom: 25px; }
-h3 { font-size: 1.5em; margin-bottom: 20px;}
-p.subtitulo {
+h1 { font-size: 1.8em; }
+h2 { font-size: 1.5em; margin-bottom: 20px; }
+.subtitulo {
+    font-size: 1em;
+    max-width: 400px;
+    margin: -10px auto 25px;
+}
+.divider {
+    border: 0; 
+    border-top: 1px solid var(--cor-borda-suave); 
+    margin: 25px 0;
+}
+.btn {
+    display: inline-block;
+    width: 100%; /* Botões ocupam a largura toda por defeito (mobile) */
+    background-color: var(--cor-primaria);
+    color: #fff;
+    font-family: var(--fonte-titulo);
+    font-weight: 600;
     font-size: 1.1em;
-    max-width: 500px;
-    margin: -15px auto 40px;
+    padding: 14px 25px;
+    border-radius: 10px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: var(--transicao-suave);
 }
-
-/* Links de Navegação */
+.btn:hover {
+    background-color: #3870b9;
+    transform: translateY(-2px);
+}
 .nav-link {
     color: var(--cor-primaria);
     font-weight: 600;
@@ -80,272 +131,246 @@ p.subtitulo {
     text-decoration: underline;
 }
 
-/* Botões */
-.btn {
-    display: inline-block;
-    background-color: var(--cor-primaria);
-    color: #fff;
-    font-family: var(--fonte-titulo);
-    font-weight: 600;
-    font-size: 1.1em;
-    padding: 16px 35px;
-    border-radius: 12px;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: var(--transicao-suave);
-    box-shadow: 0 5px 15px rgba(74, 144, 226, 0.25);
+/* --- TELA INICIAL --- */
+.choice-container {
+    display: flex;
+    flex-direction: column; /* Vertical por defeito (mobile) */
+    gap: 20px;
+    margin-top: 30px;
 }
-.btn:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(74, 144, 226, 0.35);
-}
-
-/* Formulários */
-.form-group {
-    text-align: left;
-    margin-bottom: 25px;
-}
-.form-group label {
-    display: block;
-    margin-bottom: 10px;
-    font-weight: 600;
-    font-size: 1.05em;
-    color: var(--cor-texto-titulo);
-}
-.form-group input, .form-group select {
-    width: 100%;
-    padding: 15px;
-    border: 1px solid var(--cor-borda-suave);
-    border-radius: 10px;
-    box-sizing: border-box;
-    font-size: 1em;
-    font-family: var(--fonte-corpo);
-    transition: var(--transicao-suave);
-}
-.form-group input:focus, .form-group select:focus {
-    outline: none;
-    border-color: var(--cor-primaria);
-    box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.15);
-}
-
-/* Divisória */
-.divider {
-    border: 0;
-    border-top: 1px solid var(--cor-borda-suave);
-    margin: 35px 0;
-}
-
-/* 4. Estilos Específicos das Telas */
-
-/* Tela Inicial (Home) */
-.choice-container { display: flex; gap: 30px; margin-top: 40px; }
 .choice-card {
-    flex: 1;
-    padding: 40px;
+    padding: 25px;
     border: 2px solid var(--cor-borda-suave);
-    border-radius: 15px;
-    text-decoration: none;
+    border-radius: 12px;
     transition: var(--transicao-suave);
     cursor: pointer;
 }
 .choice-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-5px);
     border-color: var(--cor-primaria);
     box-shadow: var(--sombra-card);
 }
-.choice-card i { font-size: 3.5em; margin-bottom: 20px; color: var(--cor-primaria); }
-.choice-card h3 { font-size: 1.4em; margin-bottom: 5px; }
+.choice-card i { font-size: 2.5em; margin-bottom: 10px; color: var(--cor-primaria); }
+.choice-card h3 { margin-bottom: 5px; font-size: 1.2em; }
+.choice-description {
+    font-size: 0.9em;
+    margin: 0;
+    color: var(--cor-texto-corpo);
+    transition: var(--transicao-suave);
+}
+.choice-card:hover h3, .choice-card:hover .choice-description { color: var(--cor-texto-titulo); }
 
-/* Painel do Cuidador */
+
+/* --- FORMULÁRIOS --- */
+.form-group {
+    text-align: left;
+    margin-bottom: 15px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 0.95em;
+}
+.form-group input, .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--cor-borda-suave);
+    border-radius: 8px;
+    font-size: 1em;
+    font-family: var(--fonte-corpo);
+}
+.form-group input:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+}
+
+
+/* --- PAINEL DO CUIDADOR --- */
 .painel-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
+    flex-direction: column; /* Vertical no mobile */
+    align-items: flex-start;
+    gap: 5px;
+    margin-bottom: 15px;
 }
-.painel-secao {
-    margin-top: 40px;
-}
+.painel-secao { margin-top: 35px; }
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 20px;
-    align-items: flex-end;
+    grid-template-columns: 1fr; /* Uma coluna por defeito */
+    gap: 15px;
 }
-.form-group-full { grid-column: 1 / -1; }
-#lista-medicamentos { list-style: none; padding: 0; margin-top: 20px; }
+#lista-medicamentos { list-style: none; padding: 0; }
 .medicamento-item-cuidador {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
+    padding: 12px 15px;
     background-color: var(--cor-fundo);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+.medicamento-item-cuidador span {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.botoes-acao { display: flex; gap: 5px; }
+.btn-editar, .btn-apagar {
+    background: none; border: none; font-size: 1.1em;
+    padding: 8px; cursor: pointer; transition: var(--transicao-suave);
+}
+.btn-editar { color: var(--cor-primaria); }
+.btn-apagar { color: var(--cor-erro); }
+.btn-editar:hover, .btn-apagar:hover { transform: scale(1.2); }
+
+.historico-header {
+    display: flex;
+    flex-direction: column; /* Vertical no mobile */
+    align-items: flex-start;
+    gap: 10px;
+}
+.filtro-data { width: 100%; }
+.filtro-data input[type="date"] { width: 100%; padding: 10px; }
+#lista-historico { list-style: none; padding: 0; margin-top: 15px; }
+.historico-item-v2 {
+    display: grid;
+    grid-template-columns: 40px 1fr; /* Colunas para ícone e conteúdo */
+    gap: 15px;
+    align-items: center;
+    padding: 15px;
+    background-color: #e9eff5;
     border-radius: 10px;
     margin-bottom: 12px;
 }
-.btn-apagar { background: none; border: none; color: var(--cor-erro); cursor: pointer; font-size: 1.2em; }
-
-/* Histórico do Cuidador */
-.historico-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-.filtro-data { display: flex; align-items: center; gap: 10px; }
-.filtro-data input[type="date"] {
-    padding: 10px;
-    border: 1px solid var(--cor-borda-suave);
-    border-radius: 8px;
-    font-family: var(--fonte-corpo);
-    font-size: 1em;
-}
-#lista-historico { list-style: none; padding: 0; margin-top: 20px; }
-.historico-item-v2 {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 20px;
-    background-color: var(--cor-card);
-    border: 1px solid var(--cor-borda-suave);
-    border-radius: 12px;
-    margin-bottom: 15px;
-}
-.historico-item-vazio { text-align: center; padding: 25px; color: var(--cor-texto-corpo); }
 .historico-icone {
-    width: 45px;
-    height: 45px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 1.3em;
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1.1em;
+    grid-row: 1 / 3; /* Ícone ocupa duas linhas */
 }
-.historico-icone.status-certo { background-color: var(--cor-sucesso); }
+.historico-detalhes p { margin: 0; font-weight: 600; font-size: 1.05em; }
+.historico-detalhes small { font-size: 0.9em; }
+.historico-status {
+    grid-column: 2 / 3; /* Ocupa a segunda coluna */
+    font-size: 0.9em;
+    font-weight: 600;
+}
+.historico-icone.status-certo { background-color: #28a745; }
 .historico-icone.status-tarde { background-color: var(--cor-aviso); }
 .historico-icone.status-esqueci { background-color: var(--cor-erro); }
 
-.historico-detalhes { flex-grow: 1; }
-.historico-detalhes p, .historico-status p { margin: 0; font-weight: 600; font-size: 1.1em;}
-.historico-detalhes small, .historico-status small { color: var(--cor-texto-corpo); font-size: 0.9em;}
-.historico-status { text-align: right; }
 
-/* --- NOVOS ESTILOS PARA O PAINEL DO IDOSO --- */
+/* --- PAINEL DO IDOSO (REMODELAÇÃO COMPLETA) --- */
+.card-idoso-wrapper { 
+    width: 100%; 
+    max-width: 700px; 
+}
 .medicamento-card-idoso {
-    background: var(--cor-card);
-    border-radius: 15px;
+    background-color: var(--cor-card);
+    border-radius: 16px;
     box-shadow: var(--sombra-card);
-    margin-bottom: 30px;
-    overflow: hidden; /* Garante que os cantos arredondados sejam mantidos */
+    margin-bottom: 25px;
+    overflow: hidden;
     transition: var(--transicao-suave);
+    border: 1px solid var(--cor-borda-suave);
 }
 .card-idoso-principal {
     display: flex;
     align-items: center;
-    gap: 20px;
-    padding: 25px;
+    gap: 15px;
+    padding: 20px;
 }
 .medicamento-foto {
-    width: 80px;
-    height: 80px;
-    border-radius: 10px;
-    object-fit: cover;
+    width: 70px; height: 70px; object-fit: cover; border-radius: 12px;
     flex-shrink: 0;
 }
 .medicamento-foto-placeholder {
-    width: 80px;
-    height: 80px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--cor-borda-suave);
-    color: var(--cor-texto-corpo);
-    font-size: 2.5em;
-    flex-shrink: 0;
+    width: 70px; height: 70px; flex-shrink: 0;
+    background-color: var(--cor-fundo);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2em; color: var(--cor-borda-suave);
 }
-.medicamento-info h3 {
-    font-size: 1.6em;
-    margin: 0 0 5px 0;
+.medicamento-info h3 { margin: 0; font-size: 1.4em; }
+.medicamento-info p { margin: 2px 0 0; font-size: 1em; color: var(--cor-texto-corpo); }
+
+/* OBSERVAÇÕES EM DESTAQUE */
+.medicamento-obs {
+    display: block;
+    background-color: #fffbe6; /* Fundo amarelo claro */
+    border-left: 4px solid var(--cor-aviso);
+    padding: 10px;
+    margin-top: 15px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #8a6d3b; /* Texto mais escuro para contraste */
 }
-.medicamento-info p {
-    margin: 0;
-    font-size: 1.1em;
+.medicamento-obs strong {
+    color: var(--cor-texto-titulo);
 }
+
 .medicamento-actions {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: grid; 
+    grid-template-columns: 1fr 1fr 1fr;
+    border-top: 1px solid var(--cor-borda-suave);
 }
 .btn-status {
-    background-color: var(--cor-fundo);
-    border: none;
-    border-top: 1px solid var(--cor-borda-suave);
-    padding: 20px;
-    font-size: 1.1em;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transicao-suave);
-    color: var(--cor-texto-corpo);
+    background: #f8fafc; color: var(--cor-texto-corpo);
+    border: none; padding: 15px 10px; font-weight: 600; cursor: pointer;
+    font-size: 0.95em; transition: var(--transicao-suave);
 }
-.btn-status i {
-    margin-right: 10px;
-}
-.btn-status:not(:last-child) {
-    border-right: 1px solid var(--cor-borda-suave);
-}
-.btn-status.certo:hover { background-color: var(--cor-sucesso); color: #fff; }
-.btn-status.tarde:hover { background-color: var(--cor-aviso); color: #fff; }
-.btn-status.esqueci:hover { background-color: var(--cor-erro); color: #fff; }
+.btn-status:not(:last-child) { border-right: 1px solid var(--cor-borda-suave); }
+.btn-status:hover { color: #fff; }
+.btn-status.certo:hover { background-color: #28a745; }
+.btn-status.tarde:hover { background-color: var(--cor-aviso); }
+.btn-status.esqueci:hover { background-color: var(--cor-erro); }
+.btn-status i { margin-right: 8px; }
 .btn-status:disabled {
-    cursor: not-allowed;
-    background-color: #e9ecef;
-    color: #adb5bd;
-}
-.medicamento-card-idoso.marcado {
-    opacity: 0.7;
+    opacity: 0.6; pointer-events: none;
 }
 .status-feedback {
-    display: none;
-    padding: 20px;
-    font-weight: 600;
-    font-size: 1.2em;
-    text-align: center;
+    display: none; padding: 15px; font-weight: 600; text-align: center;
+    font-size: 1.1em;
 }
-.medicamento-card-idoso.marcado-certo .status-feedback { background-color: var(--cor-sucesso); color: #fff; }
-.medicamento-card-idoso.marcado-tarde .status-feedback { background-color: var(--cor-aviso); color: #fff; }
-.medicamento-card-idoso.marcado-esqueci .status-feedback { background-color: var(--cor-erro); color: #fff; }
-
 .card-vazio {
-    text-align: center;
-    padding: 50px;
-    background-color: var(--cor-card);
-    border-radius: 15px;
-    box-shadow: var(--sombra-card);
+    padding: 40px; text-align: center; background-color: var(--cor-card);
+    border-radius: 15px; box-shadow: var(--sombra-card);
 }
-.card-vazio i {
-    font-size: 4em;
-    color: var(--cor-borda-suave);
-    margin-bottom: 20px;
-}
+.card-vazio i { font-size: 3em; color: var(--cor-secundaria); }
+.card-vazio p { margin-top: 15px; font-size: 1.1em; }
 
-/* Responsividade */
-@media (max-width: 768px) {
-    body { padding: 15px; }
-    .card { padding: 25px; }
-    .choice-container { flex-direction: column; }
-    h1 { font-size: 1.8em; }
-    h2 { font-size: 1.5em; }
-    .medicamento-actions {
-        grid-template-columns: 1fr; /* Botões em coluna em ecrãs pequenos */
+.medicamento-card-idoso.marcado { border-color: transparent; }
+.medicamento-card-idoso.marcado-certo { border-left-color: #28a745; }
+.medicamento-card-idoso.marcado-tarde { border-left-color: var(--cor-aviso); }
+.medicamento-card-idoso.marcado-esqueci { border-left-color: var(--cor-erro); }
+
+.status-feedback.status-certo { background-color: #e9f5ec; color: #28a745; }
+.status-feedback.status-tarde { background-color: #fff8e1; color: #8a6d3b; }
+.status-feedback.status-esqueci { background-color: #fbe9ea; color: var(--cor-erro); }
+
+
+/* --- MEDIA QUERIES PARA ECRÃS MAIORES --- */
+
+@media (min-width: 600px) {
+    .card { padding: 40px; }
+    h1 { font-size: 2.2em; }
+    h2 { font-size: 1.8em; }
+    .subtitulo { font-size: 1.1em; }
+
+    .choice-container {
+        flex-direction: row; /* Horizontal em ecrãs maiores */
     }
-    .btn-status:not(:last-child) {
-        border-right: none;
-        border-bottom: 1px solid var(--cor-borda-suave);
+    
+    .form-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
+
+    .painel-header, .historico-header {
+        flex-direction: row; /* Horizontal em ecrãs maiores */
+        align-items: center;
+    }
+    .filtro-data { width: auto; }
 }
 
