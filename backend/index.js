@@ -188,6 +188,15 @@ app.get('/api/historico/:idosoId', async (req, res) => {
     }
 });
 
+const frontendPath = path.join(__dirname, '..', 'frontend');
+app.use(express.static(frontendPath));
+
+// A SOLUÇÃO ESTÁ AQUI: Rota "catch-all" para a SPA. 
+// Qualquer pedido que não seja para a API, devolve o index.html
+// Esta rota deve vir DEPOIS de todas as suas rotas de API.
+app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 // --- INICIAR O SERVIDOR ---
 app.listen(PORT, () => {
