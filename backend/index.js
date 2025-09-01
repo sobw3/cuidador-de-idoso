@@ -1,26 +1,31 @@
-// backend/index.js - Versão com filtro de histórico por data e fuso horário corrigido
+// backend/index.js - Versão Final para Produção (Render)
 
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
+const path = require('path'); // Módulo para lidar com caminhos de ficheiros
 
 const app = express();
-const PORT = 3000;
+// O Render define a porta através da variável de ambiente PORT
+const PORT = process.env.PORT || 3000;
 
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
+// Configuração da conexão com a base de dados do Render
+// Esta é a alteração mais importante para a produção!
 const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'cuidado_idosos_db',
-    password: '12345', // A sua senha
-    port: 5432,
+    connectionString: process.env.DATABASE_URL, // O Render fornece esta variável de ambiente
+    ssl: {
+        rejectUnauthorized: false // Necessário para as ligações SSL do Render
+    }
 });
 
-// --- ROTAS DE AUTENTICAÇÃO E MEDICAMENTOS (sem alterações) ---
-app.post('/registro', async (req, res) => {
+// --- ROTAS DA API ---
+// Todas as rotas agora começam com /api para não conflitarem com o front-end
+app.post('/api/registro', async (req, res) => {
     let client;
     try {
         const { nomeCuidador, email, senhaCuidador, nomeIdoso, loginIdoso, senhaIdoso } = req.body;
@@ -44,7 +49,7 @@ app.post('/registro', async (req, res) => {
     }
 });
 
-app.post('/login/cuidador', async (req, res) => {
+app.post('/api/login/cuidador', async (req, res) => {
     try {
         const { email, senha } = req.body;
         const cuidadorResult = await pool.query('SELECT * FROM cuidadores WHERE email = $1', [email]);
@@ -65,7 +70,7 @@ app.post('/login/cuidador', async (req, res) => {
     }
 });
 
-app.post('/login/idoso', async (req, res) => {
+app.post('/api/login/idoso', async (req, res) => {
     try {
         const { login_numerico, senha } = req.body;
         const idosoResult = await pool.query('SELECT * FROM idosos WHERE login_numerico = $1', [login_numerico]);
@@ -80,9 +85,7 @@ app.post('/login/idoso', async (req, res) => {
     }
 });
 
-
-// --- ROTAS PARA MEDICAMENTOS ---
-app.post('/medicamentos', async (req, res) => {
+app.post('/api/medicamentos', async (req, res) => {
     try {
         const { nome, dosagem, horario, foto_url, idoso_id } = req.body;
         if (!nome || !dosagem || !horario || !idoso_id) { return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos.' }); }
@@ -94,7 +97,7 @@ app.post('/medicamentos', async (req, res) => {
     }
 });
 
-app.get('/medicamentos/:idosoId', async (req, res) => {
+app.get('/api/medicamentos/:idosoId', async (req, res) => {
     try {
         const { idosoId } = req.params;
         const medicamentosResult = await pool.query('SELECT * FROM medicamentos WHERE idoso_id = $1 ORDER BY horario', [idosoId]);
@@ -105,7 +108,7 @@ app.get('/medicamentos/:idosoId', async (req, res) => {
     }
 });
 
-app.delete('/medicamentos/:medicamentoId', async (req, res) => {
+app.delete('/api/medicamentos/:medicamentoId', async (req, res) => {
     try {
         const { medicamentoId } = req.params;
         await pool.query('DELETE FROM medicamentos WHERE id = $1', [medicamentoId]);
@@ -116,18 +119,11 @@ app.delete('/medicamentos/:medicamentoId', async (req, res) => {
     }
 });
 
-
-// --- ROTAS PARA O HISTÓRICO ---
-app.post('/historico', async (req, res) => {
+app.post('/api/historico', async (req, res) => {
     try {
         const { medicamento_id, status } = req.body;
-        if (!medicamento_id || !status) {
-            return res.status(400).json({ message: 'Dados insuficientes para registar o histórico.' });
-        }
-        await pool.query(
-            'INSERT INTO historico_medicamentos (medicamento_id, status) VALUES ($1, $2)',
-            [medicamento_id, status]
-        );
+        if (!medicamento_id || !status) { return res.status(400).json({ message: 'Dados insuficientes para registar o histórico.' }); }
+        await pool.query('INSERT INTO historico_medicamentos (medicamento_id, status) VALUES ($1, $2)', [medicamento_id, status]);
         res.status(201).json({ message: 'Histórico registado com sucesso.' });
     } catch (error) {
         console.error('ERRO AO REGISTAR HISTÓRICO:', error);
@@ -135,28 +131,15 @@ app.post('/historico', async (req, res) => {
     }
 });
 
-// ROTA DE HISTÓRICO ATUALIZADA E CORRIGIDA COM FUSO HORÁRIO DO BRASIL
-app.get('/historico/:idosoId', async (req, res) => {
+app.get('/api/historico/:idosoId', async (req, res) => {
     try {
         const { idosoId } = req.params;
-        const { data } = req.query; 
-
-        if (!data) {
-            return res.status(400).json({ message: 'A data é um parâmetro obrigatório.' });
-        }
-
+        const { data } = req.query;
+        if (!data) { return res.status(400).json({ message: 'A data é um parâmetro obrigatório.' }); }
         const query = `
-            SELECT 
-                h.status,
-                h.data_hora,
-                m.nome,
-                m.dosagem,
-                m.horario
-            FROM historico_medicamentos h
-            JOIN medicamentos m ON h.medicamento_id = m.id
-            WHERE 
-                m.idoso_id = $1 
-                AND DATE(h.data_hora AT TIME ZONE 'America/Sao_Paulo') = $2 -- <-- CORREÇÃO APLICADA AQUI
+            SELECT h.status, h.data_hora, m.nome, m.dosagem, m.horario
+            FROM historico_medicamentos h JOIN medicamentos m ON h.medicamento_id = m.id
+            WHERE m.idoso_id = $1 AND DATE(h.data_hora AT TIME ZONE 'America/Sao_Paulo') = $2
             ORDER BY h.data_hora DESC;
         `;
         const historicoResult = await pool.query(query, [idosoId, data]);
@@ -167,14 +150,18 @@ app.get('/historico/:idosoId', async (req, res) => {
     }
 });
 
+// --- SERVIR O FRONT-END ---
+// Esta secção serve os ficheiros da pasta 'frontend'
+const frontendPath = path.join(__dirname, '..', 'frontend');
+app.use(express.static(frontendPath));
 
-// --- INICIA O SERVIDOR ---
-pool.connect((err, client, release) => {
-    if (err) { return console.error('❌ ERRO AO CONECTAR COM O BANCO DE DADOS:', err.stack); }
-    client.release();
-    console.log('✅ Conexão com o banco de dados bem-sucedida!');
-    app.listen(PORT, () => {
-        console.log(`🚀 Servidor a funcionar na porta ${PORT} e pronto para receber requisições!`);
-    });
+// Rota "catch-all" para a SPA. Qualquer pedido que não seja para a API, devolve o index.html
+app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
+// --- INICIAR O SERVIDOR ---
+app.listen(PORT, () => {
+    console.log(`🚀 Servidor a funcionar na porta ${PORT}`);
 });
 
